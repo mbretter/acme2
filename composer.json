@@ -5,7 +5,7 @@
     "description": "ACME2 low level library",
     "keywords": ["letsencrypt","acme2"],
     "homepage": "https://github.com/mbretter/acme2",
-    "license": "BSD-3-Clause",
+    "license": "MIT",
     "authors": [
         {
             "name": "Michael Bretterklieber",
