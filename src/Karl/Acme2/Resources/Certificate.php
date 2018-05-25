@@ -152,7 +152,8 @@ EOT;
 
     /**
      * reads certificate x509 information
-     * converts validFrom/To into PHP DateTime objects
+     * - converts validFrom/To into PHP DateTime objects
+     * - puts all subjects including subjectAltNames into subjects property
      *
      * @param $cert
      *
@@ -175,8 +176,21 @@ EOT;
         $ret->validFrom = new \DateTime('@' . $info['validFrom_time_t']);
         $ret->validTo   = new \DateTime('@' . $info['validTo_time_t']);
 
+        $subjects = [$ret->subject['CN']];
+
+        if (isset($info['extensions']) && isset($info['extensions']['subjectAltName']))
+        {
+            // [subjectAltName] => DNS:*.example.com, DNS:example.com
+            $altNames = explode(',', $info['extensions']['subjectAltName']);
+            foreach ($altNames as $an)
+                $subjects[] = trim(substr($an, strpos($an, ':') + 1));
+        }
+
+        $ret->subjects = array_unique($subjects);
+
         return $ret;
     }
+
 
     /**
      * split PEM formatted certificate into an array of PEM strings
@@ -187,18 +201,19 @@ EOT;
      */
     public function splitChain($cert)
     {
-        $data = null;
+        $data  = null;
         $chain = [];
         foreach (explode("\n", $cert) as $line)
         {
             if (preg_match('/^-+BEGIN CERTIFICATE-+/', $line))
             {
                 $data = '';
-            } else if (preg_match('/^-+END CERTIFICATE-+/', $line))
+            }
+            else if (preg_match('/^-+END CERTIFICATE-+/', $line))
             {
-                $data .= sprintf("%s\n", $line);
+                $data    .= sprintf("%s\n", $line);
                 $chain[] = $data;
-                $data = null;
+                $data    = null;
             }
 
             if ($data !== null)

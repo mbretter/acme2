@@ -3,6 +3,7 @@
 namespace Karl\Acme2\Resources;
 
 use Karl\Acme2;
+use Karl\Acme2\Exception\RequestException;
 
 class Account
 {
@@ -17,7 +18,7 @@ class Account
      * lookup whether account exists for the given key
      *
      * @return null|\stdClass
-     * @throws Acme2\Exception\RequestException
+     * @throws RequestException
      */
     public function lookup()
     {
@@ -39,21 +40,27 @@ class Account
     /**
      * create an account
      *
+     * params may contain the contact key, this is an array of strings (email addresses)
+     * for more params @see https://ietf-wg-acme.github.io/acme/draft-ietf-acme-acme.html#rfc.section.7.3
+     *
+     * ```
+     * $acme = new Acme2\Acme();
+     * $key = new Acme2\Key\RSA();
+     * $key->generate();
+     * $pem = $key->getPem(); // store the pem key somehow somewhere
+     * $acme->setKey($key);
+     * $account = new Acme2\Resources\Account($acme);
+     * $account->create(['termsOfServiceAgreed' => true, 'contact' => ['mailto:foo@example.com']]);
+     * ```
+     *
      * @param array $params
      *
      * @return mixed
-     * @throws Acme2\Exception\RequestException
+     * @throws RequestException
      */
     public function create($params = [])
     {
-        $payload = [];
-        if (isset($params['contact']))
-            $payload['contact'] = $params['contact'];
-
-        if (isset($params['termsOfServiceAgreed']))
-            $payload['termsOfServiceAgreed'] = true;
-
-        $response = $this->acme->send('newAccount', 'post', $payload);
+        $response = $this->acme->send('newAccount', 'post', $params);
 
         return json_decode($response->getBody());
     }
@@ -64,7 +71,7 @@ class Account
      * @param $location
      *
      * @return mixed
-     * @throws Acme2\Exception\RequestException
+     * @throws RequestException
      */
     public function get($location)
     {
@@ -79,7 +86,7 @@ class Account
      * @param $location
      *
      * @return mixed
-     * @throws Acme2\Exception\RequestException
+     * @throws RequestException
      */
     public function deactivate($location)
     {
@@ -95,6 +102,7 @@ class Account
      * @param array $params
      *
      * @return mixed
+     * @throws RequestException
      */
     public function update($url, $params = [])
     {
@@ -116,6 +124,7 @@ class Account
      * @param $location
      *
      * @return mixed
+     * @throws RequestException
      */
     public function getOrders($location)
     {
