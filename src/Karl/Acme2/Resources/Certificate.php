@@ -191,7 +191,6 @@ EOT;
         return $ret;
     }
 
-
     /**
      * split PEM formatted certificate into an array of PEM strings
      *
@@ -221,5 +220,27 @@ EOT;
         }
 
         return $chain;
+    }
+
+    /**
+     * check whether a subject matches a list of subjects, supports wildcard domains *.example.com
+     *
+     * @param string $subject
+     * @param object $metaData an object with subjects property as returned by readMetaData
+     *
+     * @return bool
+     */
+    public function validateSubject($subject, $metaData)
+    {
+        if (!isset($metaData->subjects) || !is_array($metaData->subjects) || !count($metaData->subjects))
+            return false;
+
+        foreach ($metaData->subjects as $s)
+        {
+            if (fnmatch($s, $subject))
+                return true;
+        }
+
+        return false;
     }
 }
