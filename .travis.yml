@@ -14,8 +14,8 @@ install:
   
 # Create a storage folder for coverage report
 before_script:
-    - mkdir -p build/logs
-    - ls -al
+  - mkdir -p build/logs
+  - ls -al
 
 script:
   - phpunit --bootstrap tests/unit/bootstrap.php --coverage-clover build/logs/clover.xml
