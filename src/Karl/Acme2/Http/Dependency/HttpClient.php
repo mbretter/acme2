@@ -21,6 +21,11 @@ trait HttpClient
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     *
+     * @return ClientInterface
+     */
     public function getHttpClient()
     {
         return $this->httpClient;

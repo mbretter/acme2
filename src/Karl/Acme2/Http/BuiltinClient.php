@@ -23,6 +23,7 @@ class BuiltinClient implements ClientInterface
             throw new \InvalidArgumentException("Method '$method' not supported.");
 
         $request->getBody()->rewind();
+
         return $this->$method($request);
     }
 
@@ -47,9 +48,9 @@ class BuiltinClient implements ClientInterface
 
         $body = file_get_contents((string)$request->getUri(), false, $context);
 
-        $statusInfo = $this->parseStatusLine($http_response_header[0]);
-
-        $headers = $this->parseHeaders($http_response_header);
+        $responseHeaders = $this->getResponseHeaders(isset($http_response_header) ? $http_response_header : null);
+        $statusInfo      = $this->parseStatusLine(array_shift($responseHeaders));
+        $headers         = $this->parseHeaders($responseHeaders);
 
         $response = new Response($headers, $body);
 
@@ -80,9 +81,9 @@ class BuiltinClient implements ClientInterface
 
         $body = @file_get_contents((string)$request->getUri(), false, $context);
 
-        $statusInfo = $this->parseStatusLine($http_response_header[0]);
-
-        $headers = $this->parseHeaders($http_response_header);
+        $responseHeaders = $this->getResponseHeaders(isset($http_response_header) ? $http_response_header : null);
+        $statusInfo      = $this->parseStatusLine(array_shift($responseHeaders));
+        $headers         = $this->parseHeaders($responseHeaders);
 
         $response = new Response($headers, $body);
 
@@ -106,13 +107,12 @@ class BuiltinClient implements ClientInterface
 
         $opts['http']['header'] = $this->buildRequestHeaders($request);
 
-        $headers = get_headers((string)$request->getUri(), 0, $context);
-        if ($headers === false)
+        $responseHeaders = get_headers((string)$request->getUri(), 0, $context);
+        if ($responseHeaders === false)
             return false;
 
-        $statusInfo = $this->parseStatusLine($http_response_header[0]);
-
-        $headers = $this->parseHeaders($http_response_header);
+        $statusInfo = $this->parseStatusLine(array_shift($responseHeaders));
+        $headers    = $this->parseHeaders($responseHeaders);
 
         $response = new Response($headers);
 
@@ -139,6 +139,24 @@ class BuiltinClient implements ClientInterface
     }
 
     /**
+     * helper method for unit testing
+     * return back response headers
+     *
+     * @codeCoverageIgnore
+     *
+     * @param $headers
+     *
+     * @return array
+     */
+    protected function getResponseHeaders($headers)
+    {
+        if ($headers === null)
+            return [];
+
+        return $headers;
+    }
+
+    /**
      * parse status code this line is part of the http_response_headers
      *
      * @param $statusLine
@@ -150,6 +168,9 @@ class BuiltinClient implements ClientInterface
         $ret               = new \stdClass();
         $ret->statusCode   = 200;
         $ret->reasonPhrase = '';
+
+        if (!strlen($statusLine))
+            return $ret;
 
         $statusAll       = explode(' ', $statusLine, 3);
         $ret->protocol   = $statusAll[0];
