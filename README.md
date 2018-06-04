@@ -16,3 +16,21 @@ Benefits:
 * no dependencies like curl or other packages
 * it comes up with a builtin httpclient, but any other PSR7 compliant http client may be used
 * it uses standard classes, but you can use your own data objects
+
+## setup new account
+
+```php
+use Karl\Acme2;
+use Karl\Acme2\Resources;
+
+$acme = new Acme2\Acme();
+
+$key = new Acme2\Key\RSA();
+$key->generate();
+$pem = $key->getPem(); // store your key somewhere
+
+$acme->setKey($key); // acme needs a key to operate
+
+$account    = new Resources\Account($acme);
+$account->create(['termsOfServiceAgreed' => true, 'contact' => ['mailto:example@example.com']]);
+```
