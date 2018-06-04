@@ -4,4 +4,4 @@ php:
   - 7.2
 script:
   - composer install --no-interaction
-  - phpunit --bootstrap tests/unit/bootstrap.php
+  - phpunit --bootstrap tests/unit/bootstrap.php --coverage-clover build/logs/clover.xml
