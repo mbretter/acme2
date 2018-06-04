@@ -31,5 +31,7 @@ class RequestException extends Exception
     {
         if (isset($this->details) && isset($this->details->type))
             return $this->details->type;
+
+        return null;
     }
 }

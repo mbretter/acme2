@@ -14,6 +14,11 @@ trait Acme
         return $this;
     }
 
+    /**
+     * @codeCoverageIgnore
+     *
+     * @return \Karl\Acme2\Acme
+     */
     public function getAcme()
     {
         return $this->acme;
