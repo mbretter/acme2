@@ -19,6 +19,7 @@ class Authorization
      * @param $url
      *
      * @return mixed
+     * @throws Acme2\Exception\RequestException
      */
     public function get($url)
     {

@@ -4,6 +4,12 @@ namespace Karl\Acme2\Http;
 
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * Class Response
+ *
+ * @package Karl\Acme2\Http
+ * @codeCoverageIgnore
+ */
 class Response extends Message implements ResponseInterface
 {
     protected $headers = [];

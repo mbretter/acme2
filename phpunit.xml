@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpunit>
+    <testsuites>
+        <testsuite name="Acme2 unit tests">
+            <directory>tests/unit</directory>
+        </testsuite>
+        <testsuite name="Acme2 integration test">
+            <directory>tests/integration</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">src</directory>
+            <exclude>
+            </exclude>
+        </whitelist>
+    </filter>
+</phpunit>

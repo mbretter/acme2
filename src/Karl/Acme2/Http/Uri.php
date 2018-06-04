@@ -13,6 +13,7 @@ use InvalidArgumentException;
  * based on Slims PSR-7 Uri implementation https://github.com/slimphp/Slim
  *
  * @package Karl\Acme2\Http
+ * @codeCoverageIgnore
  */
 class Uri implements UriInterface
 {

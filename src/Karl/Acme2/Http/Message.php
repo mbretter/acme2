@@ -7,6 +7,12 @@ namespace Karl\Acme2\Http;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
 
+/**
+ * Class Message
+ *
+ * @package Karl\Acme2\Http
+ * @codeCoverageIgnore
+ */
 class Message implements MessageInterface
 {
     protected $protocolVersion = '1.0';

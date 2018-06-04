@@ -21,5 +21,17 @@
         "psr-4": {
             "Karl\\": "src/Karl"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Acme2\\Tests\\Unit\\": "tests/unit/"
+        }
+    },
+    "scripts": {
+        "test-unit": "phpunit -v --testsuite=\"Acme2 unit tests\" --testdox --bootstrap tests/unit/bootstrap.php",
+        "test-reports": "phpunit --testsuite=\"Acme2 unit tests\" --bootstrap tests/unit/bootstrap.php --coverage-html reports/coverage --coverage-clover reports/clover.xml --coverage-crap4j reports/crap4j.xml --log-junit reports/junit.xml"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.1"
     }
 }

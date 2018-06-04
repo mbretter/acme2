@@ -11,6 +11,7 @@ use RuntimeException;
  * dumb PSR-7 stream class, can handle stream strings only
  *
  * @package Karl\Acme2\Http
+ * @codeCoverageIgnore
  */
 class Stream implements StreamInterface
 {

@@ -24,14 +24,23 @@ class Account
     {
         $payload = ['onlyReturnExisting' => true];
 
-        $response = $this->acme->send('newAccount', 'post', $payload);
-
-        if ($response->getStatusCode() == 200)
+        try
         {
-            $ret      = new \stdClass();
-            $ret->url = $response->getHeaderLine('Location');
+            $response = $this->acme->send('newAccount', 'post', $payload);
 
-            return $ret;
+            if ($response->getStatusCode() == 200)
+            {
+                $ret      = new \stdClass();
+                $ret->url = $response->getHeaderLine('Location');
+
+                return $ret;
+            }
+        } catch (RequestException $re)
+        {
+            if ($re->getCode() == 400 && $re->getDetailType() == 'urn:ietf:params:acme:error:accountDoesNotExist')
+                return null;
+
+            throw $re;
         }
 
         return null;
@@ -97,27 +106,18 @@ class Account
 
     /**
      *
-     *
      * @param string $url
-     * @param array $params
+     * @param array $payload keys: contact, termsOfServiceAgreed
      *
      * @return mixed
      * @throws RequestException
      */
-    public function update($url, $params = [])
+    public function update($url, $payload = [])
     {
-        $payload = [];
-        if (isset($params['contact']))
-            $payload['contact'] = $params['contact'];
-
-        if (isset($params['termsOfServiceAgreed']))
-            $payload['termsOfServiceAgreed'] = true;
-
         $response = $this->acme->send($url, 'post', $payload);
 
         return json_decode($response->getBody());
     }
-
 
     /**
      *

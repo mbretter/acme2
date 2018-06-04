@@ -1,0 +1,35 @@
+<?php
+
+namespace Acme2\Tests\Unit\Stubs\Http;
+
+class OrderResponse extends GenericResponse
+{
+    public function __construct($headers = [], $bodyString = null)
+    {
+        $bodyString = <<<EOT
+{
+  "status": "valid",
+  "expires": "2015-03-01T14:09:00Z",
+
+  "identifiers": [
+    { "type": "dns", "value": "example.com" },
+    { "type": "dns", "value": "www.example.com" }
+  ],
+
+  "notBefore": "2016-01-01T00:00:00Z",
+  "notAfter": "2016-01-08T00:00:00Z",
+
+  "authorizations": [
+    "https://example.com/acme/authz/1234",
+    "https://example.com/acme/authz/2345"
+  ],
+
+  "finalize": "https://example.com/acme/acct/1/order/1/finalize",
+
+  "certificate": "https://example.com/acme/cert/1234"
+}
+EOT;
+
+        parent::__construct($headers, $bodyString);
+    }
+}

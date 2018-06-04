@@ -16,7 +16,14 @@ class Challenge
         $this->acme = $acme;
     }
 
-
+    /**
+     * retrieve the challenge information from the CA
+     *
+     * @param $url
+     *
+     * @return mixed
+     * @throws Acme2\Exception\RequestException
+     */
     public function get($url)
     {
         $response = $this->acme->get($url);

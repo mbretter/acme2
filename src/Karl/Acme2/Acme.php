@@ -103,7 +103,7 @@ class Acme
         if (strlen($urlAppend))
             $url = sprintf('%s/%s', $url, $urlAppend);
 
-        if (!count($payload))
+        if (is_array($payload) && !count($payload))
             $payload = new \stdClass();
 
         $data = $this->buildJWS($payload, $url);
@@ -134,7 +134,9 @@ class Acme
             ->withHeader('Content-Type', 'application/json');
 
         foreach ($headers as $k => $v)
+        {
             $request = $request->withHeader($k, $v);
+        }
 
         $response = $this->httpClient->send($request);
 

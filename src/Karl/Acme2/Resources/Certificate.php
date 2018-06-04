@@ -54,10 +54,10 @@ EOT;
         if ($this->acme === null)
             throw new RuntimeException('Need acme for sending requests.');
 
-        if (!is_object($orderData) || !isset($orderData->certificate))
+        if (!is_object($orderData) || !isset($orderData->certificate) || !isset($orderData->status))
             throw new InvalidArgumentException('invalid order data given.');
 
-        if ($orderData->status == 'valid' && isset($orderData->certificate))
+        if ($orderData->status == 'valid' && strlen($orderData->certificate))
         {
             $response = $this->acme->get($orderData->certificate, ['Accept' => $format]);
 
@@ -86,6 +86,7 @@ EOT;
      * @param $cert
      * @param int $reason
      *
+     * @return bool
      * @throws Acme2\Exception\RequestException
      */
     public function revoke($cert, $reason = 0)
@@ -96,7 +97,9 @@ EOT;
 
         $cert = Acme2\Helper::base64urlEncode($cert);
 
-        $this->acme->send('revokeCert', 'post', ['certificate' => $cert, 'reason' => (int)$reason]);
+        $response = $this->acme->send('revokeCert', 'post', ['certificate' => $cert, 'reason' => (int)$reason]);
+
+        return $response->getStatusCode() == 200;
     }
 
     /**
@@ -183,10 +186,12 @@ EOT;
             // [subjectAltName] => DNS:*.example.com, DNS:example.com
             $altNames = explode(',', $info['extensions']['subjectAltName']);
             foreach ($altNames as $an)
+            {
                 $subjects[] = trim(substr($an, strpos($an, ':') + 1));
+            }
         }
 
-        $ret->subjects = array_unique($subjects);
+        $ret->subjects = array_values(array_unique($subjects));
 
         return $ret;
     }

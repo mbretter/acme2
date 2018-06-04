@@ -104,7 +104,7 @@ class RSA implements KeyInterface
     {
         $jwk = $this->getJWK();
 
-        // re-order important
+        // re-order, important
         $thumb = [
             'e'   => $jwk['e'],
             'kty' => $jwk['kty'],
@@ -115,8 +115,8 @@ class RSA implements KeyInterface
     }
 
     /**
-     * @param $jwsProtected array
-     * @param $payload string the raw payload
+     * @param array $jwsProtected
+     * @param mixed $payload the raw payload
      *
      * @return array
      */
