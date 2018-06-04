@@ -9,4 +9,10 @@
 
 ACME2 low level php library
 
-in beta state dont use it at the moment
+This library has been built to be integrated into applications, not as standalone acme client.
+
+Benefits:
+
+* no dependencies like curl or other packages
+* it comes up with a builtin httpclient, but any other PSR7 compliant http client may be used
+
