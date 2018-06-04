@@ -179,41 +179,19 @@ class CertificateTest extends TestCase
 CA Issuers - URI:http://cert.stg-int-x1.letsencrypt.org/
 ',
                     'subjectAltName'         => 'DNS:acmetest6.bretterklieber.com',
-                    'certificatePolicies'    => 'Policy: 2.23.140.1.2.1
-Policy: 1.3.6.1.4.1.44947.1.1.1
-  CPS: http://cps.letsencrypt.org
-  User Notice:
-    Explicit Text: This Certificate may only be relied upon by Relying Parties and only in accordance with the Certificate Policy found at https://letsencrypt.org/repository/
-',
-                    'ct_precert_scts'        => 'Signed Certificate Timestamp:
-    Version   : v1 (0x0)
-    Log ID    : B0:CC:83:E5:A5:F9:7D:6B:AF:7C:09:CC:28:49:04:87:
-                2A:C7:E8:8B:13:2C:63:50:B7:C6:FD:26:E1:6C:6C:77
-    Timestamp : May 16 14:40:20.851 2018 GMT
-    Extensions: none
-    Signature : ecdsa-with-SHA256
-                30:46:02:21:00:85:D2:B4:B5:E1:2D:F9:E4:DB:9D:19:
-                55:83:D5:0A:72:B5:89:62:AC:6F:A4:37:B4:D0:12:A8:
-                68:95:6A:8E:52:02:21:00:FD:AE:DA:FD:87:EB:C9:08:
-                27:BB:59:1A:F9:A6:C6:19:85:46:59:86:B7:A6:D8:BC:
-                EB:DC:70:D6:97:89:C3:F8
-Signed Certificate Timestamp:
-    Version   : v1 (0x0)
-    Log ID    : DD:99:34:FC:A5:E7:24:80:C9:56:68:7D:81:34:99:08:
-                49:B2:49:F7:B5:69:D8:C7:BC:AB:3F:5C:C1:F3:6E:64
-    Timestamp : May 16 14:40:22.778 2018 GMT
-    Extensions: none
-    Signature : ecdsa-with-SHA256
-                30:45:02:20:0C:90:7D:0F:92:3F:D6:77:C3:E7:C8:4F:
-                8D:76:05:B4:0A:3E:16:5A:66:44:F6:3B:0A:C2:B8:3E:
-                25:D1:36:BE:02:21:00:FA:96:CC:5F:4C:3A:15:A9:BF:
-                39:AC:3E:36:23:16:84:0B:91:28:B2:3A:0E:E7:AB:C3:
-                15:BE:AF:B5:A8:94:2C',
                 ),
             'subjects'         => ['acmetest6.bretterklieber.com']
         ];
 
-        $this->assertEquals($expected, $data);
+
+        $this->assertEquals($expected->name, $data->name);
+        $this->assertEquals($expected->subject, $data->subject);
+        $this->assertEquals($expected->subjects, $data->subjects);
+        $this->assertEquals($expected->hash, $data->hash);
+        $this->assertEquals($expected->issuer, $data->issuer);
+        $this->assertEquals($expected->extensions['subjectAltName'], $data->extensions['subjectAltName']);
+        $this->assertEquals($expected->validFrom, $data->validFrom);
+        $this->assertEquals($expected->validTo, $data->validTo);
 
     }
 
@@ -281,7 +259,7 @@ AqH/omQQrCfi
 -----END CERTIFICATE-----
 
 EOT
-, $chain[0]);
+            , $chain[0]);
         $this->assertEquals(<<<EOT
 -----BEGIN CERTIFICATE-----
 MIIEqzCCApOgAwIBAgIRAIvhKg5ZRO08VGQx8JdhT+UwDQYJKoZIhvcNAQELBQAw
@@ -312,7 +290,7 @@ n5Z5MqkYhlMI3J1tPRTp1nEt9fyGspBOO05gi148Qasp+3N+svqKomoQglNoAxU=
 -----END CERTIFICATE-----
 
 EOT
-, $chain[1]);
+            , $chain[1]);
     }
 
     public function testValidateSubject()
@@ -480,7 +458,6 @@ AqH/omQQrCfi
 
 EOT;
     }
-
 
 
     protected function getSampleWithAltNames()
