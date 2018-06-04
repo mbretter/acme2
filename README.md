@@ -15,4 +15,4 @@ Benefits:
 
 * no dependencies like curl or other packages
 * it comes up with a builtin httpclient, but any other PSR7 compliant http client may be used
-
+* it uses standard classes, but you can use your own data objects
