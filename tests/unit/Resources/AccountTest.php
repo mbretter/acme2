@@ -89,6 +89,17 @@ class AccountTest extends TestCase
         $this->assertEquals('mailto:cert-admin@example.com', $ret->contact[0]);
     }
 
+    public function testCreateWithFailed()
+    {
+        $response = (new GenericResponse())->withStatus(400);
+
+        $this->acmeMock->method('send')->willReturn($response);
+
+        $ret = $this->account->create();
+
+        $this->assertNull($ret);
+    }
+
     public function testGet()
     {
         $response = new AccountResponse();

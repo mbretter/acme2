@@ -30,7 +30,7 @@ class Account
 
             if ($response->getStatusCode() == 200)
             {
-                $ret      = new \stdClass();
+                $ret = new \stdClass();
                 $ret->url = $response->getHeaderLine('Location');
 
                 return $ret;
@@ -70,8 +70,15 @@ class Account
     public function create($params = [])
     {
         $response = $this->acme->send('newAccount', 'post', $params);
+        if ($response->getStatusCode() == 201)
+        {
+            $ret = json_decode((string)$response->getBody());
+            $ret->url = $response->getHeaderLine('Location');
 
-        return json_decode($response->getBody());
+            return $ret;
+        }
+
+        return null;
     }
 
     /**
