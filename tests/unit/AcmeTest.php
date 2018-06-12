@@ -43,6 +43,18 @@ class AcmeTest extends TestCase
         $this->acme->setHttpClient($this->httpClientMock);
     }
 
+    public function testConstructor()
+    {
+        $acme = new Acme(false);
+        $this->assertEquals('https://acme-v02.api.letsencrypt.org/', $acme->getEndpoint());
+
+        $acme = new Acme();
+        $this->assertEquals('https://acme-staging-v02.api.letsencrypt.org/', $acme->getEndpoint());
+
+        $acme = new Acme('https://fooca.example.com/');
+        $this->assertEquals('https://fooca.example.com/', $acme->getEndpoint());
+    }
+
     public function testFetchDirectory()
     {
         $this->httpClientMock->method('send')->willReturn(new DirectoryResponse());

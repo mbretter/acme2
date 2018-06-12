@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Karl\Acme2;
 
 use Karl\Acme2\Exception\RequestException;
@@ -27,13 +26,19 @@ class Acme
 {
     use HttpClient;
 
-    protected $nonce;
-
+    /**
+     * lets encrypt endpoints, for other CAs you have to set the URL in the constructor
+     * @var array
+     */
     protected $endpoints = [
         'prod'    => 'https://acme-v02.api.letsencrypt.org/',
         'staging' => 'https://acme-staging-v02.api.letsencrypt.org/'
     ];
 
+    /**
+     * url endpoint
+     * @var string
+     */
     protected $endpoint = null;
 
     /**
@@ -41,26 +46,49 @@ class Acme
      */
     protected $key = null;
 
-    /** @var \stdClass */
+    /**
+     * @var \stdClass
+     */
     protected $directory;
 
+    /**
+     * the last fetched nonce
+     * @var string
+     */
+    protected $nonce;
 
-    public function __construct($staging = true, ClientInterface $httpClient = null)
+    /**
+     * Acme constructor.
+     * @param bool|string $stagingUrl if it is a string it is treated as url
+     * @param ClientInterface|null $httpClient
+     */
+    public function __construct($stagingUrl = true, ClientInterface $httpClient = null)
     {
-        $this->endpoint = $staging ? $this->endpoints['staging'] : $this->endpoints['prod'];
+        if (is_string($stagingUrl))
+            $this->endpoint = $stagingUrl;
+        else
+            $this->endpoint = $stagingUrl ? $this->endpoints['staging'] : $this->endpoints['prod'];
         $this->setHttpClient($httpClient);
     }
 
+    /**
+     * send a head request and retrieve a new nonce
+     * @return string
+     */
     public function newNonce()
     {
         $directory = $this->getDirectory();
-        $request   = $this->emptyRequest('HEAD', $directory->newNonce);
+        $request = $this->emptyRequest('HEAD', $directory->newNonce);
 
         $response = $this->httpClient->send($request);
 
         return $response->getHeaderLine('Replay-Nonce');
     }
 
+    /**
+     * return directory and/or fetch it from the CA if not present
+     * @return \stdClass
+     */
     public function getDirectory()
     {
         if ($this->directory === null)
@@ -69,9 +97,13 @@ class Acme
         return $this->directory;
     }
 
+    /**
+     * fetch the directory containing endpoints for various requests
+     * @return \stdClass
+     */
     public function fetchDirectory()
     {
-        $request  = $this->emptyRequest('GET', $this->endpoint . 'directory')
+        $request = $this->emptyRequest('GET', $this->endpoint . 'directory')
             ->withHeader('Content-Type', 'application/json');
         $response = $this->httpClient->send($request);
 
@@ -95,7 +127,7 @@ class Acme
             throw new RuntimeException('Need a key for sending requests.');
 
         $directory = $this->getDirectory();
-        $url       = $resource;
+        $url = $resource;
 
         if (property_exists($directory, $resource))
             $url = $directory->$resource;
@@ -121,8 +153,9 @@ class Acme
     }
 
     /**
-     * @param $url
+     * send a get request
      *
+     * @param $url
      * @param array $headers
      *
      * @return ResponseInterface
@@ -196,6 +229,10 @@ class Acme
         return Helper::base64urlEncode($this->key->buildJWKThumbprint());
     }
 
+    /**
+     * @param KeyInterface $key
+     * @return $this
+     */
     public function setKey(KeyInterface $key)
     {
         $this->key = $key;
@@ -203,11 +240,30 @@ class Acme
         return $this;
     }
 
+    /**
+     * @return KeyInterface
+     */
     public function getKey()
     {
         return $this->key;
     }
 
+    /**
+     * return main communication endpoint
+     * @return string
+     */
+    public function getEndpoint()
+    {
+        return $this->endpoint;
+    }
+
+
+    /**
+     * build a new empty PSR-7 HttpRequest
+     * @param $method
+     * @param $url
+     * @return Request
+     */
     protected function emptyRequest($method, $url)
     {
         return new Request($method, new Body(''), Uri::createFromString($url));

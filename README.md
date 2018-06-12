@@ -32,7 +32,6 @@ The Acme class is the manager for all requests, it carries the directory, the pr
 interface between the resource objects and the http client. 
 
 ```php
-
 $acme = new Acme2\Acme(); // without any args staging urls are used
 
 $acme = new Acme2\Acme(true); // for production use
@@ -46,7 +45,6 @@ Before you can send any other requests you must subscribe for an account, this i
 create call.
 
 ```php
-
 $acme = new Acme2\Acme();
 
 $key = new Acme2\Key\RSA(); // we use an RSA key
@@ -67,12 +65,9 @@ You have to store the private key PEM and the kid somewhere in your system.
 If you have the PEM only, the key id can be retrieved using the lookup method:
 
 ```php
-
 $acme = new Acme2\Acme();
 
 $key = new Acme2\Key\RSA($pemKey);
-
-$acme->setKey($key); // acme needs a key to operate
 
 $account = new Resources\Account($acme);
 $info = $account->lookup();
@@ -87,12 +82,11 @@ if ($info !== null)
 
 
 ```php
-
 $acme = new Acme2\Acme();
-
 $key = new Acme2\Key\RSA($pemKey);
+$acme->setKey($key);
 
-$account    = new Resources\Account($acme);
+$account = new Resources\Account($acme);
 $account->deactivate($kid);
 
 ```
@@ -102,7 +96,6 @@ $account->deactivate($kid);
 ### create new order
 
 ```php
-
 $acme = new Acme2\Acme();
 $key = new Acme2\Key\RSA($pemKey);
 $key->setKid($kid);
@@ -121,7 +114,6 @@ $orderUrl = $orderData->url; // store the orderUrl somewhere
 ### get an existing order
 
 ```php
-
 $order = new Acme2\Resources\Order($acme);
 
 $orderData = $order->get($orderUrl);
