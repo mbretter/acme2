@@ -71,9 +71,6 @@ class Authorization
             }
         }
 
-        if ($challenge === null)
-            throw new InvalidArgumentException("No challenge found for type `$type`");
-
         return $challenge;
     }
 }

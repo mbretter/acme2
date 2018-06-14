@@ -80,14 +80,11 @@ JSON
         $this->assertEquals('DGyRejmCefe7v4NfDGDKfA', $challenge->token);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testGetChallengeNotFound()
     {
         $auth = json_decode($this->getSample());
 
-        $this->authorization->getChallenge($auth, 'xxx');
+        $this->assertNull($this->authorization->getChallenge($auth, 'xxx'));
     }
 
     /**
