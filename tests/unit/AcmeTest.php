@@ -15,7 +15,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 
-
 class AcmeTest extends TestCase
 {
     /**
@@ -169,7 +168,7 @@ class AcmeTest extends TestCase
 
     public function testSendWithPayload()
     {
-        $payload   = (object)['foo' => 'bar'];
+        $payload = (object)['foo' => 'bar'];
         $protected = [
             'protected' => 'eyJub25jZSI6IjVabm5oUWhBajVsNXFtNFk5Wll2akU5Rmg1bUlFc2M5aEJFeV9saERLcU0iLCJ1cmwiOiJodHRwczpcL1wvYWNtZS1zdGFnaW5nLXYwMi5hcGkubGV0c2VuY3J5cHQub3JnXC9hY21lXC9uZXctYWNjdCIsImFsZyI6IlJTMjU2IiwiandrIjp7Imt0eSI6IlJTQSIsIm4iOiJzTmM5dW42ZUZYcWw4eldxLVY3SVhScVhPSmtiNGIwMWl3aXlZMnNlbWR1RGU3eVgtWEl5VnJXcWExUU1tZkRPMHZ6YldyWkpLSFIxMV80bjMwekJjTzlYN0Foek50LXRJVm95MU9CVUVDMDNvdUFVOXJlaGExUFpBb2liX3JWUGNadVNqWjVnRHhwUEV0TXJuS0JJeVM3QXIzd3Z5N3ZHUWo1RjgxV3docEgxUGgzeElDSmtYeFhuNlNnTGdOdGN1TUNaZzFnODUzbFFoSHVRVzc0Z2FsdTJ4NFA5TmtfQ0FOXzlsYUJJamZHVnhlMzZUYUZXOEprQzQwUWYxTDduaHQ3NWZDMzVOVnp0Y2prWkRId3ZNSGszV0wwaGdjZU1wT19KQ1RqNTM2T1pnb3pOWkJRU2pFYzFPT0lweV96OVBQVWJiZWZRbWh2QkR1TXR1ZjhOMFEiLCJlIjoiQVFBQiJ9fQ',
             'payload'   => 'eyJmb28iOiJiYXIifQ',
@@ -190,7 +189,6 @@ class AcmeTest extends TestCase
         }))->willReturn($response);
 
         $this->httpClientMock->method('isSuccessful')->willReturn(true);
-
 
         $resp = $this->acme->send('newAccount', 'post', $payload);
         $this->assertEquals($response, $resp);
@@ -246,4 +244,30 @@ class AcmeTest extends TestCase
         $res = $this->acme->get('https://acme-staging-v02.api.letsencrypt.org/acme/order/5994507/1002745', ['Content-Type' => 'application/json']);
         $this->assertEquals($res, $response);
     }
+
+    public function testAccount()
+    {
+        $this->assertInstanceOf('Karl\Acme2\Resources\Account', $this->acme->account());
+    }
+
+    public function testAuthorization()
+    {
+        $this->assertInstanceOf('Karl\Acme2\Resources\Authorization', $this->acme->authorization());
+    }
+
+    public function testCertificate()
+    {
+        $this->assertInstanceOf('Karl\Acme2\Resources\Certificate', $this->acme->certificate());
+    }
+
+    public function testChallenge()
+    {
+        $this->assertInstanceOf('Karl\Acme2\Resources\Challenge', $this->acme->challenge());
+    }
+
+    public function testOrder()
+    {
+        $this->assertInstanceOf('Karl\Acme2\Resources\Order', $this->acme->order());
+    }
+
 }

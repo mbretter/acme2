@@ -6,6 +6,11 @@ use Karl\Acme2\Exception\RequestException;
 use Karl\Acme2\Http\ClientInterface;
 use Karl\Acme2\Http\Dependency\HttpClient;
 use Karl\Acme2\Key\KeyInterface;
+use Karl\Acme2\Resources\Account;
+use Karl\Acme2\Resources\Authorization;
+use Karl\Acme2\Resources\Certificate;
+use Karl\Acme2\Resources\Challenge;
+use Karl\Acme2\Resources\Order;
 use Psr\Http\Message\ResponseInterface;
 
 use Karl\Acme2\Http\Body;
@@ -199,6 +204,17 @@ class Acme
     }
 
     /**
+     * build a new empty PSR-7 HttpRequest
+     * @param $method
+     * @param $url
+     * @return Request
+     */
+    protected function emptyRequest($method, $url)
+    {
+        return new Request($method, new Body(''), Uri::createFromString($url));
+    }
+
+    /**
      * build JSON Web Signature
      *
      * @see https://tools.ietf.org/html/rfc7515
@@ -257,16 +273,45 @@ class Acme
         return $this->endpoint;
     }
 
+    // some helpers
 
     /**
-     * build a new empty PSR-7 HttpRequest
-     * @param $method
-     * @param $url
-     * @return Request
+     * @return Account
      */
-    protected function emptyRequest($method, $url)
+    public function account()
     {
-        return new Request($method, new Body(''), Uri::createFromString($url));
+        return new Account($this);
     }
 
+    /**
+     * @return Order
+     */
+    public function order()
+    {
+        return new Order($this);
+    }
+
+    /**
+     * @return Authorization
+     */
+    public function authorization()
+    {
+        return new Authorization($this);
+    }
+
+    /**
+     * @return Challenge
+     */
+    public function challenge()
+    {
+        return new Challenge($this);
+    }
+
+    /**
+     * @return Certificate
+     */
+    public function certificate()
+    {
+        return new Certificate($this);
+    }
 }
