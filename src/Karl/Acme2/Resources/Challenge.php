@@ -47,7 +47,13 @@ class Challenge
     }
 
     /**
-     * build the key authorization which must be deployed to dns or a well known path
+     * build the key authorization which must be deployed to dns or a well known path followed by the token
+     * /.well-known/acme-challenge/LoqXcYV8q5ONbJQxbmR7SCTNo3tiAXDfowyjxAjEuX0
+     *
+     * for dns challenges the base64urlencoded sha256 hash must be build around the key auth
+     * for deploying into the DNS TXT record:
+     * _acme-challenge.example.org 300 IN TXT "w2toDKxcQx2N8zcu4HnDboT1FceHs7lupLMTXsPbXCQ"
+     *
      * keyAuthorization = token || '.' || base64url(JWK_Thumbprint(accountKey))
      *
      * @param object $challenge the challenge object
@@ -56,12 +62,17 @@ class Challenge
      */
     public function buildKeyAuthorization($challenge)
     {
-        if (!is_object($challenge) || !isset($challenge->token))
+        if (!is_object($challenge) || !isset($challenge->token) || !isset($challenge->type))
             throw new InvalidArgumentException('invalid challenge object.');
 
         $thumbprint = $this->acme->getJWKThumbprint();
 
-        return sprintf('%s.%s', $challenge->token, $thumbprint);
+        $keyAuth = sprintf('%s.%s', $challenge->token, $thumbprint);
+
+        if ($challenge->type == 'dns-01')
+            return Helper::base64urlEncode(hash('sha256', $keyAuth, true));
+
+        return $keyAuth;
     }
 
 }

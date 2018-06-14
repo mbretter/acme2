@@ -91,6 +91,20 @@ JSON
         $this->assertEquals($expected, $this->challenge->buildKeyAuthorization($challenge));
     }
 
+    public function testBuildDnsKeyAuthorization()
+    {
+        $expected  = 'n57iDJwSGqCunLjQIBEmQbYFxUUB4cxr9ucvSuJPHxM';
+        $challenge = (object)array(
+            'type'   => 'dns-01',
+            'status' => 'pending',
+            'url'    => 'https://acme-staging-v02.api.letsencrypt.org/acme/challenge/Y7_LW1p0km3hdl1DKAzlLAJff2aJpsmnMeBcPg-FkC8/127868480',
+            'token'  => 'UyuaOa5SGfr9IslZWP8e0ygu3X62an15Uz66s1YQVVM'
+        );
+        $this->acmeMock->method('getJWKThumbprint')->willReturn('2123213abcdef');
+
+        $this->assertEquals($expected, $this->challenge->buildKeyAuthorization($challenge));
+    }
+
     /**
      * @expectedException \InvalidArgumentException
      */
@@ -105,5 +119,15 @@ JSON
     public function testBuildKeyAuthorizationInvalidArgs2()
     {
         $this->challenge->buildKeyAuthorization((object)[]);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testBuildKeyAuthorizationInvalidArgs3()
+    {
+        $this->challenge->buildKeyAuthorization((object)[
+            'token' => 'foo'
+        ]);
     }
 }
