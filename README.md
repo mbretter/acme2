@@ -63,7 +63,7 @@ $acme = new Acme2\Acme();
 $key = new Acme2\Key\RSA($pemKey);
 $acme->setKey($key);
 
-$accountData = $acme->account()->lookup;
+$accountData = $acme->account()->lookup();
 ...
 ```
 
@@ -157,7 +157,7 @@ $orderData = $order->get($orderUrl);
 print_r($orderData);
 ```
 
-output:
+example output:
 ```
 stdClass Object
 (
@@ -186,11 +186,11 @@ stdClass Object
 
 ## authorization
 
-basically there are two possibilities to validate your orders, the first is put the key authorization into a wellknown path and the other one ist to provision a DNS TXT record with the authentication hash.
+Basically there are two possibilities to validate your orders, the first is put the key authorization into a wellknown path and the other one ist to provision a DNS TXT record with the authentication key.
 
-Once you have done one of these steps, you have to tell the CA to verify the order by either querying the DNS record or by fetching the key authorization from the well known path.
+Once you have done one of these steps, you have to tell the CA to verify the order, the verification is done by either querying the DNS record or by fetching the key authorization from the well known path.
 
-The authentication must be done for each identifier added to the order, each authentication usualy offers the DNS and the HTTP method, they are called challenges, for wildcard domains the DNS challenge is supported only.
+The authentication must be done for each identifier added to the order, each authentication usually offers the DNS and the HTTP method, they are called challenges, for wildcard domains the DNS challenge is supported only.
 
 
 ```php
@@ -230,16 +230,29 @@ practically, only one challenge type needs to succeed for successfully validatin
 
 ### DNS challenge
 
-The DNS TXT record, where you have to put the auth key, is called _acme-challenge, e.g. _acme-challenge.example.org 300 IN TXT "w2toDKxcQx2N8zcu4HnDboT1FceHs7lupLMTXsPbXCQ".
+The DNS TXT record, where you have to put the auth key, is called _acme-challenge, e.g.
+
+_acme-challenge.example.org 300 IN TXT "w2toDKxcQx2N8zcu4HnDboT1FceHs7lupLMTXsPbXCQ".
 
 You can put multiple TXT records with the same name there, this is needed if you are using wildcard domains and an alternative subject name with the domainname.
 
 ### HTTP challenge
 
 When using HTTP challenges, you have to put the auth key under the path:
-/.well-known/acme-challenge/<token>
+
+/.well-known/acme-challenge/&lt;token&gt;
+
 /.well-known/acme-challenge/LoqXcYV8q5ONbJQxbmR7SCTNo3tiAXDfowyjxAjEuX0
 
-the token is found inside the challenge data.
+The token can be found inside the challenge data.
 
-Important: the well known path must be available using HTTP not HTTPS, even if you have a valid certificate, otherwise you will have problems when re-newing your certificate.
+Important: the well known path must be available using HTTP not HTTPS, even if you have a valid certificate, otherwise you will have problems when renewing your certificate.
+
+## finalize
+
+ToDo
+
+## download the certificate
+
+ToDo
+
