@@ -32,11 +32,39 @@ The Acme class is the manager for all requests, it carries the directory, the pr
 interface between the resource objects and the http client. 
 
 ```php
-$acme = new Acme2\Acme(); // without any args staging urls are used
+$acme = new Acme2\Acme(); // without any args letsencrypt staging urls are used
 
-$acme = new Acme2\Acme(true); // for production use
+$acme = new Acme2\Acme(true); // for letsencrypt production use
+
+$acme = new Acme2\Acme('https://someca.example.com/acme'); // for any other acme compatible CA
 
 $acme = new Acme2\Acme(true, $myHttpClient); // use my own http client, it must implement the Acme2\Http\ClientInterface
+```
+
+## resources
+
+you can use the resources by creating the objects yourself, this is useful, if you have your own DI/Container system:
+
+```php
+$acme = new Acme2\Acme();
+
+$key = new Acme2\Key\RSA($pemKey);
+$acme->setKey($key);
+
+$account = new Resources\Account($acme)
+$accountData = account->lookup();
+```
+
+the other way ist to use the acme object to retrieve the resource objects, which is more fluent:
+
+```php
+$acme = new Acme2\Acme();
+
+$key = new Acme2\Key\RSA($pemKey);
+$acme->setKey($key);
+
+$accountData = $acme->account()->lookup;
+...
 ```
 
 ## account management
@@ -53,8 +81,7 @@ $pem = $key->getPem(); // get the PEM, store your key somewhere
 
 $acme->setKey($key); // acme needs a key to operate
 
-$account    = new Resources\Account($acme);
-$accountData = $account->create(['termsOfServiceAgreed' => true, 'contact' => ['mailto:example@example.com']]);
+$accountData = $acme->account()->create(['termsOfServiceAgreed' => true, 'contact' => ['mailto:example@example.com']]);
 $kid = $accountData->url; // acme uses the account url as keyId
 ```
 
@@ -69,13 +96,11 @@ $acme = new Acme2\Acme();
 
 $key = new Acme2\Key\RSA($pemKey);
 
-$account = new Resources\Account($acme);
-$info = $account->lookup();
+$info = $acme->account()->lookup();
 if ($info !== null)
 {
     $key->setKid($info->url); // account location is used as kid
 }
-
 ```
 
 ### account deactivation
@@ -88,7 +113,6 @@ $acme->setKey($key);
 
 $account = new Resources\Account($acme);
 $account->deactivate($kid);
-
 ```
 
 ## orders
@@ -101,15 +125,27 @@ $key = new Acme2\Key\RSA($pemKey);
 $key->setKid($kid);
 $acme->setKey($key);
 
-$order = new Acme2\Resources\Order($acme);
-$newOrder = $order->addIdentifier(null, 'acme01.example.com'); // create a new order object 
-$order->addIdentifier($newOrder, 'acme02.example.com'); // add another identifier
+$newOrder = $acme->order()->addIdentifier(null, 'acme01.example.com'); // create a new order object 
+$acme->order()->addIdentifier($newOrder, 'acme02.example.com'); // add another identifier
 
-$orderData = $order->create($newOrder);
+$orderData = $acme->order()->create($newOrder);
 
 $orderUrl = $orderData->url; // store the orderUrl somewhere
-
 ```
+
+create an order for a wildcard domain:
+
+```php
+...
+$newOrder = $acme->order()->addIdentifier(null, '*.example.com');
+
+$orderData = $acme->order()->create($newOrder);
+
+$orderUrl = $orderData->url; // store the orderUrl somewhere
+```
+
+Note: letsencrypt does support dns validation only for wildcard domains.
+
 
 ### get an existing order
 
@@ -146,6 +182,64 @@ stdClass Object
     [certificate] => https://acme-staging-v02.api.letsencrypt.org/acme/cert/a83732947234cdef
     [url] => https://acme-staging-v02.api.letsencrypt.org/acme/order/999999/111111
 )
-
 ```
 
+## authorization
+
+basically there are two possibilities to validate your orders, the first is put the key authorization into a wellknown path and the other one ist to provision a DNS TXT record with the authentication hash.
+
+Once you have done one of these steps, you have to tell the CA to verify the order by either querying the DNS record or by fetching the key authorization from the well known path.
+
+The authentication must be done for each identifier added to the order, each authentication usualy offers the DNS and the HTTP method, they are called challenges, for wildcard domains the DNS challenge is supported only.
+
+
+```php
+$orderData = $acme->order()->get($orderUrl);
+
+foreach ($orderData->authorizations as $a)
+{
+    $authData = $acme->authorization()->get($a);
+
+    printf("authorization for: %s\n", $authData->identifier->value);
+
+    $challengeData = $acme->authorization()->getChallenge($authData, 'dns-01');
+    if ($challengeData === null)
+        continue;
+
+    // you have to add the $authKey to the DNS TXT record
+    $authKey = $acme->challenge()->buildKeyAuthorization($challengeData);
+    printf("DNS auth key is: %s\n", $authKey);
+
+    // tell the CA to validate the challenge
+    $acme->challenge()->validate($challengeData->url);
+
+    $challengeData = $acme->authorization()->getChallenge($authData, 'http-01');
+    if ($challengeData === null)
+        continue;
+
+    // you have to put the $authKey to the well known path
+    $authKey = $acme->challenge()->buildKeyAuthorization($challengeData);
+    printf("HTTP auth key is: %s\n", $authKey);
+
+    // tell the CA to validate the challenge
+    $acme->challenge()->validate($challengeData->url);
+}
+```
+
+practically, only one challenge type needs to succeed for successfully validating the identifier.
+
+### DNS challenge
+
+The DNS TXT record, where you have to put the auth key, is called _acme-challenge, e.g. _acme-challenge.example.org 300 IN TXT "w2toDKxcQx2N8zcu4HnDboT1FceHs7lupLMTXsPbXCQ".
+
+You can put multiple TXT records with the same name there, this is needed if you are using wildcard domains and an alternative subject name with the domainname.
+
+### HTTP challenge
+
+When using HTTP challenges, you have to put the auth key under the path:
+/.well-known/acme-challenge/<token>
+/.well-known/acme-challenge/LoqXcYV8q5ONbJQxbmR7SCTNo3tiAXDfowyjxAjEuX0
+
+the token is found inside the challenge data.
+
+Important: the well known path must be available using HTTP not HTTPS, even if you have a valid certificate, otherwise you will have problems when re-newing your certificate.
