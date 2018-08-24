@@ -9,11 +9,13 @@
 
 ACME2 low level php library
 
-This library has been built to be integrated into applications, not as standalone acme client.
+This library has been built to be integrated into applications, not as a standalone acme client.
+
+The ACME2 specs: [https://ietf-wg-acme.github.io/acme/draft-ietf-acme-acme.html](https://ietf-wg-acme.github.io/acme/draft-ietf-acme-acme.html)
 
 Benefits:
 
-* no dependencies to other packages, like http clients, curl
+* no dependencies to other packages, like http clients
 * it comes up with a builtin http client (based on PHP streams), though any other PSR-7 compliant http client could be used
 * the PSR-7 implementation is heavily based on slim, with some modifications
 * it uses standardclasses and arrays, no fancy data objects or sophisticated data models
@@ -38,12 +40,12 @@ $acme = new Acme2\Acme(true); // for letsencrypt production use
 
 $acme = new Acme2\Acme('https://someca.example.com/acme'); // for any other acme compatible CA
 
-$acme = new Acme2\Acme(true, $myHttpClient); // use my own http client, it must implement the Acme2\Http\ClientInterface
+$acme = new Acme2\Acme(true, $myHttpClient); // use your own http client
 ```
 
 ## resources
 
-you can use the resources by creating the objects yourself, this is useful, if you have your own DI/Container system:
+You can create the objects yourself, this is useful, if you have your own DI/Container system:
 
 ```php
 $acme = new Acme2\Acme();
@@ -52,10 +54,10 @@ $key = new Acme2\Key\RSA($pemKey);
 $acme->setKey($key);
 
 $account = new Resources\Account($acme)
-$accountData = account->lookup();
+$accountData = $account->lookup();
 ```
 
-the other way ist to use the acme object to retrieve the resource objects, which is more fluent:
+The other way ist to use the acme object to retrieve the resource objects, which is more fluent:
 
 ```php
 $acme = new Acme2\Acme();
@@ -81,7 +83,10 @@ $pem = $key->getPem(); // get the PEM, store your key somewhere
 
 $acme->setKey($key); // acme needs a key to operate
 
-$accountData = $acme->account()->create(['termsOfServiceAgreed' => true, 'contact' => ['mailto:example@example.com']]);
+$accountData = $acme->account()->create([
+    'termsOfServiceAgreed' => true, 
+    'contact' => ['mailto:example@example.com']
+]);
 $kid = $accountData->url; // acme uses the account url as keyId
 ```
 
@@ -144,7 +149,7 @@ $orderData = $acme->order()->create($newOrder);
 $orderUrl = $orderData->url; // store the orderUrl somewhere
 ```
 
-Note: letsencrypt does support dns validation only for wildcard domains.
+Note: When using wildcard domains, Lets encrypt supports DNS validation only.
 
 
 ### get an existing order
@@ -186,7 +191,7 @@ stdClass Object
 
 ## authorization
 
-Basically there are two possibilities to validate your orders, the first is put the key authorization into a wellknown path and the other one ist to provision a DNS TXT record with the authentication key.
+Basically there are two possibilities to validate your orders, the first one is to put the key authorization into a wellknown path and the other one is to provision a DNS TXT record with the authentication key.
 
 Once you have done one of these steps, you have to tell the CA to verify the order, the verification is done by either querying the DNS record or by fetching the key authorization from the well known path.
 
@@ -246,6 +251,8 @@ When using HTTP challenges, you have to put the auth key under the path:
 
 The token can be found inside the challenge data.
 
+The Content-Type of the response must be application/octet-stream.
+
 Important: the well known path must be available using HTTP not HTTPS, even if you have a valid certificate, otherwise you will have problems when renewing your certificate.
 
 ## finalize
@@ -255,4 +262,12 @@ ToDo
 ## download the certificate
 
 ToDo
+
+## renew
+
+ToDo
+
+## ToDos
+
+* EC keys
 
